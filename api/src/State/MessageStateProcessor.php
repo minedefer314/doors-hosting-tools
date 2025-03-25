@@ -8,6 +8,7 @@ use App\Entity\Message;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
 use App\Service\RobloxApiService;
+use App\Service\WebsocketService;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 class MessageStateProcessor implements ProcessorInterface
@@ -16,14 +17,18 @@ class MessageStateProcessor implements ProcessorInterface
     private RobloxApiService $api;
     private UserRepository $ure;
 
+    private WebsocketService $socket;
+
     public function __construct(
         MessageRepository $mre,
         RobloxApiService $api,
         UserRepository $ure,
+        WebsocketService $socket
     ) {
         $this->mre = $mre;
         $this->api = $api;
         $this->ure = $ure;
+        $this->socket = $socket;
     }
 
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Message
@@ -37,6 +42,8 @@ class MessageStateProcessor implements ProcessorInterface
             throw new UnauthorizedHttpException('Bearer', 'Authentication required');
         }
 
-        return $this->mre->addMessage(content: $data->getContent(), sender: $userData['user']);
+        $message = $this->mre->addMessage(content: $data->getContent(), sender: $userData['user']);
+        $this->socket->fireClients();
+        return $message;
     }
 }

@@ -17,6 +17,7 @@ services:
       - 8000:80
     networks:
       - network
+
   api:
     build:
       args:
@@ -37,6 +38,7 @@ services:
       - database
     networks:
       - network
+
   app:
     build:
       args:
@@ -56,6 +58,7 @@ services:
       - 3000:3000
     networks:
       - network
+
   database:
     build:
       context: .
@@ -73,6 +76,20 @@ services:
       MYSQL_ROOT_PASSWORD: rdbapi
       MYSQL_USER: udbapi
       MYSQL_PASSWORD: pdbapi
+    networks:
+      - network
+
+  mercure:
+    image: dunglas/mercure
+    container_name: ${COMPOSE_PROJECT_NAME}-mercure
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: 'I89yNqDU0KRqNAQ02KApBya64G+jRgWMbsX0to9Vaa0='
+      MERCURE_SUBSCRIBER_JWT_KEY: 'I89yNqDU0KRqNAQ02KApBya64G+jRgWMbsX0to9Vaa0='
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins "*"
+    ports:
+      - "4000:80"
     networks:
       - network
 

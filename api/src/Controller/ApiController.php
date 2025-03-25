@@ -3,7 +3,8 @@
 namespace App\Controller;
 
 use App\Repository\GameRepository;
-use App\Repository\MessageRepository;
+use App\Service\WebsocketService;
+use Firebase\JWT\JWT;
 use App\Repository\UserRepository;
 use App\Service\RobloxApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,8 +12,9 @@ use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mercure\HubInterface;
+use Symfony\Component\Mercure\Update;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -93,5 +95,28 @@ class ApiController extends AbstractController
         $userData = $api->getLoginData($ure);
         $userData = $serializer->serialize($userData, 'json');
         return new JsonResponse($userData, Response::HTTP_OK, [], true);
+    }
+
+    #[Route('/api/mercure-token', name: 'mercure_token')]
+    public function generateToken(): JsonResponse
+    {
+        $secret = $_ENV['MERCURE_JWT_SECRET'];
+
+        $payload = [
+            "mercure" => [
+                "subscribe" => ["http://localhost:8000/api/messages"]
+            ]
+        ];
+
+        $jwt = JWT::encode($payload, $secret, 'HS256');
+
+        return new JsonResponse(['token' => $jwt]);
+    }
+
+    #[Route('/api/send-update', name: 'send_update')]
+    public function sendUpdate(WebsocketService $socket): JsonResponse
+    {
+        $socket->fireClients();
+        return new JsonResponse(['status' => 'Update sent!']);
     }
 }

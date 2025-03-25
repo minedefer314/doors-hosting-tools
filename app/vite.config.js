@@ -22,6 +22,11 @@ export default defineConfig({
         target: 'http://host.docker.internal:8000',
         changeOrigin: true,
         secure: false
+      },
+      '/.well-known': {
+        target: 'http://host.docker.internal:4000',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

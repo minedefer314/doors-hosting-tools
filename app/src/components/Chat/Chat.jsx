@@ -14,7 +14,6 @@ const Chat = () => {
 
         if(response.ok){
             setMessage("")
-            await updateMessages()
         } else {
             console.log("An error occured while trying to send the message")
         }
@@ -50,11 +49,25 @@ const Chat = () => {
         )
     }
 
-    useEffect(() => {
-        updateMessages()
-        const interval = setInterval(updateMessages, 1000)
+    const connectToServer = async () => {
+        const response = await fetch("/api/mercure-token")
+        const data = await response.json()
+        const url = new URL(window.location.protocol + "//" + window.location.host + "/.well-known/mercure")
+        url.searchParams.append("topic", "http://localhost:8000/api/messages")
+        url.searchParams.append("authorization", data["token"])
 
-        return () => clearInterval(interval)
+        const eventSource = new EventSource(url)
+
+        eventSource.onmessage = (event) => {
+            updateMessages()
+        }
+
+        return () => eventSource.close()
+    }
+
+    useEffect(() => {
+        updateMessages().then()
+        connectToServer().then()
     }, [])
 
     return (
@@ -78,7 +91,7 @@ const Chat = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Send a message"
-                onKeyDown={(e) => {if (e.key === "Enter") sendMessage()}}
+                onKeyDown={(e) => {if (e.key === "Enter") sendMessage().then()}}
             />
         </div>
     )
