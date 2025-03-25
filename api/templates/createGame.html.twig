@@ -1,0 +1,8 @@
+{% extends 'public/base.html.twig' %}
+{% block title %}Create a new game{% endblock %}
+{% block body %}
+    {% include 'public/navbar.html.twig' %}
+    <div {{ react_component('createGame') }}>
+        Loading...
+    </div>
+{% endblock %}

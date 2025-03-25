@@ -1,0 +1,22 @@
+{% extends 'public/base.html.twig' %}
+{% block title %}Games{% endblock %}
+{% block body %}
+    {% include 'public/navbar.html.twig' %}
+    <div class="container container-md">
+        <div class="row row-cols-4 gy-3 gx-3 mb-5 text-center">
+            {% for game in games %}
+                <div class="col d-flex">
+                    <a class="card card-body d-flex flex-column h-100 w-100 text-center min" href="/">
+                        <h5 class="card-title flex-grow-1 d-flex align-items-center justify-content-center">
+                            <b><u>{{ game.title }}</u></b>
+                        </h5>
+                        <h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        <a class="btn btn-outline-primary" href="{{ path('app_games_create') }}">
+            Create a new game
+        </a>
+    </div>
+{% endblock %}
